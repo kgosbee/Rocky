@@ -67,11 +67,10 @@ Balboa32U4Encoders encoders;
 Balboa32U4Buzzer buzzer;
 Balboa32U4ButtonA buttonA;
 
-
 #define FIXED_ANGLE_CORRECTION (0.30)  // Replace the value 0.25 with the value you obtained from the Gyro calibration procedure
 
-
-
+const char fugue[] PROGMEM =
+  "T98 L8 f#ef#ef#e L16 f# L8 e f#.a L2 g# L4 r L16 r L16 a L8 ag#. L16 f# L8 f#. L16 e L8 f#ef#ag# L16 g# L2 g#";
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,6 +155,7 @@ void setup()
 
   ledGreen(0);
   ledYellow(0);
+  buzzer.playMode(PLAY_CHECK);
 }
 
 
@@ -226,40 +226,44 @@ void balanceResetAccumulators()
 }
 
 
-
 void loop()
 {
+  buzzer.playFromProgramSpace(fugue);
+  buzzer.playCheck();
   static uint32_t prev_print_time = 0;   // this variable is to control how often we print on the serial monitor
   int16_t distanceDiff;    // this stores the difference in distance in encoder clicks that was traversed by the right vs the left wheel
   static float del_theta = 0;
   char enableLongTermGyroCorrection = 1;
-
+  Serial.print(buzzer.playCheck());
   cur_time = millis();                   // get the current time in miliseconds
 
-
+  
   if ((cur_time - prev_time) > UPDATE_TIME_MS) {
     UpdateSensors();                    // run the sensor updates.
-
+    Serial.print(buzzer.playCheck());
     // calculate the angle in radians. The FIXED_ANGLE_CORRECTION term comes from the angle calibration procedure (separate sketch available for this)
     // del_theta corrects for long-term drift
     angle_rad = ((float)angle) / 1000 / 180 * 3.14159 - FIXED_ANGLE_CORRECTION - del_theta;
 
     if (angle_rad > 0.1 || angle_rad < -0.1)     // If angle is not within +- 6 degrees, reset counter that waits for start
     {
+      Serial.print(buzzer.playCheck());
       start_counter = 0;
     }
 
 
     if (angle_rad > -0.1 && angle_rad < 0.1 && ! start_flag)
     {
+      Serial.print(buzzer.playCheck());
       // increment the start counter
       start_counter++;
       // If the start counter is greater than 30, this means that the angle has been within +- 6 degrees for 0.3 seconds, then set the start_flag
       if (start_counter > 30)
       {
+        Serial.print(buzzer.playCheck());
         balanceResetEncoders();
         start_flag = 1;
-        buzzer.playFrequency(DIV_BY_10 | 445, 1000, 15);
+        //buzzer.playFrequency(DIV_BY_10 | 445, 1000, 15);
         Serial.println("Starting");
         ledYellow(1);
       }
@@ -269,24 +273,30 @@ void loop()
     // every UPDATE_TIME_MS, if the start_flag has been set, do the balancing
     if (start_flag)
     {
+      Serial.print(buzzer.playCheck());
       GetMotorAndAngleMeasurements();
       if (enableLongTermGyroCorrection)
+        Serial.print(buzzer.playCheck());
         del_theta = 0.999 * del_theta + 0.001 * angle_rad; // assume that the robot is standing. Smooth out the angle to correct for long-term gyro drift
 
       // Control the robot
-      BalanceRocky();
+        BalanceRocky();
+        Serial.print(buzzer.playCheck());
     }
     prev_time = cur_time;
+    Serial.print(buzzer.playCheck());
   }
   // if the robot is more than 45 degrees, shut down the motor
   if (start_flag && angle_rad > .78)
   {
+    Serial.print(buzzer.playCheck());
     motors.setSpeeds(0, 0);
     start_flag = 0;
     Serial.print("Shutting Down");
   }
   else if (start_flag && angle < -0.78)
   {
+    Serial.print(buzzer.playCheck());
     motors.setSpeeds(0, 0);
     start_flag = 0;
     Serial.print("Shutting Down");
@@ -295,12 +305,14 @@ void loop()
   // kill switch
   if (buttonA.getSingleDebouncedPress())
   {
+    buzzer.playCheck();
     motors.setSpeeds(0, 0);
     while (!buttonA.getSingleDebouncedPress());
   }
 
   if (cur_time - prev_print_time > 103)  // do the printing every 105 ms. Don't want to do it for an integer multiple of 10ms to not hog the processor
   {
+    buzzer.playCheck();
     Serial.print(angle_rad);
     Serial.print("\t");
     Serial.print(distLeft_m);
@@ -312,6 +324,5 @@ void loop()
     Serial.println(speedCont);
     prev_print_time = cur_time;
   }
-
 
 }
