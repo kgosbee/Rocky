@@ -145,7 +145,9 @@ void loop()
   // turn motor on for 3 seconds 
   if(cur_time > 3000)
       motors.setSpeeds((int16_t) (0), (int16_t)(0));
-  else
+      
+  else if(cur_time>1550)
+    //Serial.print(cur_time);
     motors.setSpeeds((int16_t) (300), (int16_t)(300));
 
   
@@ -162,8 +164,8 @@ void loop()
         Serial.print(measured_speedR);  // speed in cm/s
         Serial.println(";");
        prev_print_time = cur_time;
+        
   }
 
  
 }
-
