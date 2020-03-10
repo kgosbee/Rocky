@@ -67,7 +67,7 @@ Balboa32U4Encoders encoders;
 Balboa32U4Buzzer buzzer;
 Balboa32U4ButtonA buttonA;
 
-#define FIXED_ANGLE_CORRECTION (0.24)  // 0.3 is the value we obtained from the Gyro calibration procedure
+#define FIXED_ANGLE_CORRECTION (0.21)  // 0.3 is the value we obtained from the Gyro calibration procedure
 
 const char fugue[] PROGMEM =
   "T98 L8 f#ef#ef#e L16 f# L8 e f#.a L2 g# L4 r L16 r L16 a L8 ag#. L16 f# L8 f#. L16 e L8 f#ef#ag# L16 g# L2 g#";
@@ -85,19 +85,14 @@ void BalanceRocky()
 
   // Enter the control parameters here
 
-  //float Jp = -91.7427;
-  //float Jp =36.5509;
-  float Jp = 105.4775;
-  //float Ji = -806.0119;
-  float Ji = -1619;
 
-  //float Ci = -384.4377;
-  float Ci = -772.2039;
+  float Jp = 131.635; //imaginary poles at -0.5 98.726;
+  float Ji = -1340.3;//-1300.5;
 
-  //float Kp = 1147.3;
-  float Kp = 2304.4;
-  //float Ki = 6875.4;
-  float Ki = 13810;
+  float Ci = -625.7059;//-614.1126;
+
+  float Kp = 2147.4;//1939.4;
+  float Ki = 13161;//12378;
 
 
   float v_c_L, v_c_R; // these are the control velocities to be sent to the motors
@@ -142,10 +137,10 @@ void BalanceRocky()
   if (v_c_R < -300) v_c_R = -300;
 
   // Set the motor speeds
-//  Serial.print(v_c_L/2);  // speed in cm/s
-//  Serial.print(", sent R speed");      
-//  Serial.print(v_c_R);  // speed in cm/s
-//  Serial.println(";");
+  Serial.print(v_c_L/2);  // speed in cm/s
+  Serial.print(", sent R speed");      
+  Serial.print(v_c_R);  // speed in cm/s
+  Serial.println(";");
   motors.setSpeeds((int16_t) (v_c_L), (int16_t)(v_c_R)); 
 
 }
@@ -333,15 +328,15 @@ void loop()
   if (cur_time - prev_print_time > 103)  // do the printing every 105 ms. Don't want to do it for an integer multiple of 10ms to not hog the processor
   {
     // buzzer.playCheck();
-    Serial.print(angle_rad);
-    Serial.print("\t");
-    Serial.print(distLeft_m);
-    Serial.print("\t");
-    Serial.print(measured_speedL);
-    Serial.print("\t");
-    Serial.print(measured_speedR);
-    Serial.print("\t");
-    Serial.println(speedCont);
+//    Serial.print(angle_rad);
+//    Serial.print("\t");
+//    Serial.print(distLeft_m);
+//    Serial.print("\t");
+//    Serial.print(measured_speedL);
+//    Serial.print("\t");
+//    Serial.print(measured_speedR);
+//    Serial.print("\t");
+//    Serial.println(speedCont);
     prev_print_time = cur_time;
   }
 
