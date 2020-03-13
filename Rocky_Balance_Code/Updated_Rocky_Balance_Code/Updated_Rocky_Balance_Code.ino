@@ -33,7 +33,7 @@ float distLeft_m;
 float distRight_m;
 
 
-extern uint32_t delta_ms;
+extern uint32_t delta_mss;
 float measured_speedL = 0;
 float measured_speedR = 0;
 float desSpeedL = 0;
@@ -67,11 +67,18 @@ Balboa32U4Encoders encoders;
 Balboa32U4Buzzer buzzer;
 Balboa32U4ButtonA buttonA;
 
-#define FIXED_ANGLE_CORRECTION (0.21)  // 0.3 is the value we obtained from the Gyro calibration procedure
+
+#define FIXED_ANGLE_CORRECTION (0.28)  // 0.28 is the value we obtained from the Gyro calibration procedure
 
 const char fugue[] PROGMEM =
-  "T98 L8 f#ef#ef#e L16 f# L8 e f#.a L2 g# L4 r L16 r L16 a L8 ag#. L16 f# L8 f#. L16 e L8 f#ef#ag# L16 g# L2 g#";
-
+"T98 L4 rr L8 f#ef#ef#e L16 f# L8 ef#a L4 g# L2 r" 
+"L16 a L8 ag#. L16 f# L8 f#. L16 e L8 f#ef#a L4 g# L4 r. L16 r"
+"L8 ef#ef#ef#e L16 f# L8 ef#a L4 g# L4 r. L16 r"
+"L16 f#g# L8 ag#. L16 f# L8 f#. L16 e L8 f#. L16e L8f#a. L4 g#r>c#b "
+"L8 bababa L16 g# L8 g# g#.e L4 f# L8 r. L16 f#e L8 a L4 g# L8 ra.g#. L16 f# L8 f#f#. L4 arb"
+"L8 rag#f#g#f#g#f# L16 f# L8 f# L4 a L2 r L16 f#a L8 ag#. L16 f# L8 g#. L16 f# L8 g# L16 f# L8 f#.a. L4 g# L8 r. MS f# L4 f#f#" 
+"ML L8 a L16 aa L8 g# L16 g#g# L8 g# L16 f#f# L8 a. L4 f# L2 r L16 f#a L8 ag#. L16 g#f#g#f#g# L8 f#g# L16 f# L8 ag#f#a L4 rf#f#"
+"L8 a L16 aa L8 g# L16 g#g# L8 g# L16 f#f# L8 a. L4 f# L2 r L16 f#a L8 ag#. L8 f#g#f# L16 g# L8 f#a.g#f#a";
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // This is the main function that performs the balancing
@@ -89,7 +96,7 @@ void BalanceRocky()
   float Jp = 131.635; //imaginary poles at -0.5 98.726;
   float Ji = -1340.3;//-1300.5;
 
-  float Ci = -625.7059;//-614.1126;
+  float Ci = -625.7059; //-614.1126;
 
   float Kp = 2147.4;//1939.4;
   float Ki = 13161;//12378;
@@ -152,7 +159,6 @@ void setup()
   // Uncomment these lines if your motors are reversed.
 //  motors.flipLeftMotor(true);
 //  motors.flipRightMotor(true);
-
   Serial.begin(9600);
   prev_time = 0;
   displacement = 0;
@@ -237,6 +243,9 @@ void balanceResetAccumulators()
 
 void loop()
 {
+  if (!buzzer.isPlaying()){
+    buzzer.playFromProgramSpace(fugue);
+  }
   // buzzer.playFromProgramSpace(fugue);
   // buzzer.playCheck();
   static uint32_t prev_print_time = 0;   // this variable is to control how often we print on the serial monitor
@@ -272,7 +281,7 @@ void loop()
         // Serial.print(buzzer.playCheck());
         balanceResetEncoders();
         start_flag = 1;
-        buzzer.playFrequency(DIV_BY_10 | 445, 1000, 15);
+        // buzzer.playFrequency(DIV_BY_10 | 445, 1000, 15);
         Serial.println("Starting");
         ledYellow(1);
       }
